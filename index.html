@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Training Performance Dashboard</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Premium Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  
+  <!-- React & Babel Standalone CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-serif {
+      font-family: 'Playfair Display', serif;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #021E16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #8F6B3E;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C8A46B;
+    }
+    .glass-panel {
+      background: rgba(10, 43, 34, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(143, 107, 62, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+    .gold-border-glow:hover {
+      border-color: rgba(200, 164, 107, 0.8);
+      box-shadow: 0 0 15px rgba(200, 164, 107, 0.15);
+    }
+    .glow-dot {
+      box-shadow: 0 0 10px #C8A46B;
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .pulse-light {
+      animation: pulse-slow 3s infinite;
+    }
+  </style>
+</head>
+<body class="bg-[#021E16] text-[#F5F3EE] overflow-x-hidden selection:bg-[#C8A46B] selection:text-[#021E16]">
+  
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // =========================================================================
+    // LOOKER STUDIO EMBED CONFIGURATION
+    // Added '?pageNavigation=hidden' parameter to completely disable the bottom bar and its popups.
+    // Ensure you append '?pageNavigation=hidden' to any future embed URLs you paste below.
+    // =========================================================================
+    const LOOKER_STUDIO_URLS = {
+      'Dashboard Overview': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
+      'Training Performance': '', // <-- Paste URL and append '?pageNavigation=hidden'
+      'Post Training': '',        // <-- Paste URL and append '?pageNavigation=hidden'
+      'Pre-Matching': '',         // <-- Paste URL and append '?pageNavigation=hidden'
+      'Post-Match': ''            // <-- Paste URL and append '?pageNavigation=hidden'
+    };
+
+    function App() {
+      // STATE MANAGEMENT
+      const [selectedTab, setSelectedTab] = useState('Dashboard Overview');
+      const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+      const [systemAlert, setSystemAlert] = useState(null);
+
+      // Automatically collapse sidebar on 13" MacBook screens for extra real estate
+      useEffect(() => {
+        const handleResize = () => {
+          if (window.innerWidth < 1366) {
+            setSidebarCollapsed(true);
+          }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
+
+      const triggerAlert = (message) => {
+        setSystemAlert(message);
+        setTimeout(() => setSystemAlert(null), 4000);
+      };
+
+      const handleTabSelect = (tabId) => {
+        setSelectedTab(tabId);
+        triggerAlert(`Switched to active view: "${tabId}"`);
+      };
+
+      const activeEmbedUrl = LOOKER_STUDIO_URLS[selectedTab];
+
+      return (
+        <div className="h-screen w-screen bg-[#021E16] text-[#F5F3EE] font-sans antialiased flex flex-col md:flex-row overflow-hidden select-none">
+          
+          {/* ==========================================
+              COLLAPSIBLE LEFT SIDEBAR NAVIGATION
+              ========================================== */}
+          <aside className={`shrink-0 bg-[#0A2B22]/90 border-r border-[#8F6B3E]/30 flex flex-col z-20 transition-all duration-300 ${
+            sidebarCollapsed ? 'w-full md:w-20' : 'w-full md:w-56'
+          }`}>
+            <div className="p-4 md:p-5 border-b border-[#8F6B3E]/30 flex items-center justify-between">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="w-9 h-9 relative shrink-0">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <polygon points="50,5 95,85 5,85" stroke="#C8A46B" strokeWidth="6" fill="none" />
+                    <polygon points="50,25 80,80 20,80" stroke="#8F6B3E" strokeWidth="4" fill="none" />
+                    <circle cx="50" cy="55" r="8" fill="#C8A46B" className="pulse-light animate-pulse" />
+                  </svg>
+                </div>
+                
+                <div className={`transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 md:max-w-0 md:pointer-events-none' : 'opacity-100 max-w-full'}`}>
+                  <h1 className="text-lg font-bold tracking-widest text-[#F5F3EE] uppercase font-serif whitespace-nowrap">CODEX 2.0</h1>
+                  <p className="text-[10px] text-[#A7B5AC] tracking-wider uppercase whitespace-nowrap">LX Data Dashboard</p>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="hidden md:flex p-1.5 rounded border border-[#8F6B3E]/40 hover:border-[#C8A46B] text-[#C8A46B] bg-[#021E16]/60 transition-colors cursor-pointer"
+                title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              >
+                <svg 
+                  className={`w-4 h-4 transform transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24" 
+                  strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Navigation Tabs */}
+            <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
+              {!sidebarCollapsed && (
+                <p className="px-3 py-2 text-[11px] font-bold text-[#8F6B3E] tracking-widest uppercase transition-opacity duration-300">
+                  Analytics Hub
+                </p>
+              )}
+              
+              {[
+                { id: 'Dashboard Overview', icon: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2zM14 12a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z' },
+                { id: 'Training Performance', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+                { id: 'Post Training', icon: 'M9 12l2 2 4-4M7.5 8H15m-7.5 8H13m9-10a9 9 0 11-18 0 9 9 0 0118 0z' },
+                { id: 'Pre-Matching', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+                { id: 'Post-Match', icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4' }
+              ].map((item) => {
+                const isActive = selectedTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleTabSelect(item.id)}
+                    className={`w-full flex items-center rounded transition-all duration-200 cursor-pointer ${
+                      sidebarCollapsed ? 'justify-center py-3' : 'justify-between px-3 py-2'
+                    } ${
+                      isActive 
+                        ? 'bg-[#063328] text-[#C8A46B] border-l-2 border-[#C8A46B] font-medium' 
+                        : 'text-[#A7B5AC] hover:text-[#F5F3EE] hover:bg-[#063328]/50'
+                    }`}
+                    title={sidebarCollapsed ? item.id : ""}
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                      </svg>
+                      {!sidebarCollapsed && (
+                        <span className="text-sm whitespace-nowrap transition-all duration-300">{item.id}</span>
+                      )}
+                    </div>
+                    {!sidebarCollapsed && isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C8A46B] glow-dot"></span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+
+          {/* ==========================================
+              MAIN CONTENT WORKSPACE
+              ========================================== */}
+          <main className="flex-1 flex flex-col min-w-0 bg-[#021E16] h-screen overflow-hidden">
+            
+            {/* MAX-WIDTH WRAPPER BLOCK
+                Locks visual stretching to 1600px max on 1080p desktop monitors,
+                while remaining beautifully responsive and fluid on smaller laptops.
+            */}
+            <div className="flex-1 w-full max-w-[1600px] mx-auto flex flex-col h-full overflow-hidden border-x border-[#8F6B3E]/10">
+              
+              {/* COMPACT TOP NAVIGATION BAR */}
+              <header className="bg-[#0A2B22]/95 border-b border-[#8F6B3E]/20 py-2.5 px-4 shrink-0 flex items-center justify-between z-10">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] px-2 py-0.5 bg-[#8F6B3E]/20 text-[#C8A46B] border border-[#8F6B3E]/40 rounded font-mono uppercase tracking-widest">
+                    CODEX 2.0 LX Portal
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 glow-dot animate-pulse"></span>
+                  <span className="text-xs text-[#A7B5AC] font-mono tracking-wide">Looker Studio Live Gateway</span>
+                </div>
+                <h2 className="text-xs font-serif font-semibold text-[#F5F3EE] tracking-tight uppercase">
+                  {selectedTab}
+                </h2>
+              </header>
+
+              {/* SYSTEM ALERT TOAST */}
+              {systemAlert && (
+                <div className="absolute top-16 right-6 bg-[#0A2B22] border-l-4 border-[#C8A46B] p-2.5 text-xs text-[#F5F3EE] rounded shadow-2xl z-50 animate-bounce">
+                  {systemAlert}
+                </div>
+              )}
+
+              {/* DYNAMIC FRAME VIEWPORT (Edge-to-Edge Canvas Area) */}
+              <div className="flex-1 w-full bg-[#021E16] overflow-hidden min-h-0 relative">
+                {activeEmbedUrl ? (
+                  // Full-screen layout with standard iframe width and bottom Google bar crop
+                  <div className="absolute inset-0 w-full h-full overflow-hidden">
+                    <iframe 
+                      src={activeEmbedUrl} 
+                      className="absolute left-0 top-0 w-full"
+                      style={{ 
+                        height: 'calc(100% + 36px)', // Extends past the viewport bounds to hide Google's bottom bar
+                        border: 'none',
+                        colorScheme: 'dark' 
+                      }}
+                      allowFullScreen
+                      sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                    ></iframe>
+                  </div>
+                ) : (
+                  // Clean dynamic placeholders with setup instructions for upcoming tabs
+                  <div className="w-full h-full flex items-center justify-center p-6 text-center overflow-y-auto">
+                    <div className="glass-panel p-8 rounded-2xl border border-[#8F6B3E]/20 max-w-md w-full flex flex-col items-center shadow-2xl">
+                      
+                      <div className="w-16 h-16 rounded-full bg-[#063328] border border-[#C8A46B]/40 flex items-center justify-center text-[#C8A46B] shadow-xl mb-4">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+
+                      <h4 className="text-xl font-serif font-bold text-[#F5F3EE]">Link Looker Studio Embed</h4>
+                      <p className="text-xs text-[#A7B5AC] mt-2 mb-6 leading-relaxed">
+                        Connect your Looker Studio report worksheet for <strong className="text-[#C8A46B]">"{selectedTab}"</strong> to present live data inside your central gateway portal.
+                      </p>
+
+                      <div className="w-full text-left space-y-3 bg-[#021E16]/60 p-4 rounded-lg border border-[#8F6B3E]/10">
+                        <p className="text-[10px] font-bold text-[#C8A46B] uppercase tracking-widest font-mono">Integration steps:</p>
+                        
+                        <div className="flex gap-2.5 items-start text-xs text-[#F5F3EE]">
+                          <span className="w-4 h-4 rounded-full bg-[#8F6B3E]/30 text-[#C8A46B] flex items-center justify-center text-[10px] font-mono shrink-0 mt-0.5">1</span>
+                          <span>Navigate to your Looker Studio report in <b>Edit Mode</b>.</span>
+                        </div>
+
+                        <div className="flex gap-2.5 items-start text-xs text-[#F5F3EE]">
+                          <span className="w-4 h-4 rounded-full bg-[#8F6B3E]/30 text-[#C8A46B] flex items-center justify-center text-[10px] font-mono shrink-0 mt-0.5">2</span>
+                          <span>Click <b>File</b> &rarr; <b>Embed report</b>, enable report embedding, and copy the source URL from inside the <code>src="..."</code> attribute. Ensure to append <code>?pageNavigation=hidden</code> to the end of the URL before saving.</span>
+                        </div>
+
+                        <div className="flex gap-2.5 items-start text-xs text-[#F5F3EE]">
+                          <span className="w-4 h-4 rounded-full bg-[#8F6B3E]/30 text-[#C8A46B] flex items-center justify-center text-[10px] font-mono shrink-0 mt-0.5">3</span>
+                          <span>Open <code>training_dashboard.html</code> and assign the URL to the corresponding tab key inside <code>LOOKER_STUDIO_URLS</code>.</span>
+                        </div>
+                      </div>
+
+                      <p className="text-[10px] font-mono text-[#8F6B3E] mt-4 uppercase tracking-widest">
+                        CODEX 2.0 Integration Hub
+                      </p>
+
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    // Render App Component safely over DOM load
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
