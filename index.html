@@ -73,8 +73,8 @@
     // Ensure you append '?pageNavigation=hidden' to any future embed URLs you paste below.
     // =========================================================================
     const LOOKER_STUDIO_URLS = {
-      'Dashboard Overview': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
-      'Training Performance': '', // <-- Paste URL and append '?pageNavigation=hidden'
+      'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
+      'Training': '', // <-- Paste URL and append '?pageNavigation=hidden'
       'Post-Training': '',        // <-- Paste URL and append '?pageNavigation=hidden'
       'Pre-Matching': '',         // <-- Paste URL and append '?pageNavigation=hidden'
       'Post-Match': ''            // <-- Paste URL and append '?pageNavigation=hidden'
@@ -82,7 +82,7 @@
 
     function App() {
       // STATE MANAGEMENT
-      const [selectedTab, setSelectedTab] = useState('Dashboard Overview');
+      const [selectedTab, setSelectedTab] = useState('LX Performance');
       const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
       const [systemAlert, setSystemAlert] = useState(null);
 
