@@ -74,6 +74,7 @@
     // =========================================================================
     const LOOKER_STUDIO_URLS = {
       'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
+      'Validation Statistics': '', // <-- Paste URL and append '?pageNavigation=hidden'
       'Training': '', // <-- Paste URL and append '?pageNavigation=hidden'
       'Post-Training': '',        // <-- Paste URL and append '?pageNavigation=hidden'
       'Pre-Matching': '',         // <-- Paste URL and append '?pageNavigation=hidden'
@@ -168,6 +169,10 @@
                 { 
                   id: 'LX Performance', 
                   icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' 
+                },
+                {
+                  id: 'Validation Statistics',
+                  icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'
                 },
                 { 
                   id: 'Training', 
@@ -267,7 +272,7 @@
                     ></iframe>
                   </div>
                 ) : (
-                                // Clean corporate layout placeholder with witty status message
+                  // Clean corporate layout placeholder with witty status message
                   <div className="w-full h-full flex items-center justify-center p-6 text-center">
                     <div className="glass-panel p-8 rounded-2xl border border-[#8F6B3E]/20 max-w-md w-full flex flex-col items-center shadow-2xl">
                       
