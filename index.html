@@ -77,7 +77,8 @@
       'Training': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_tu8qg2e43d?pageNavigation=hidden', // <-- Paste URL and append '?pageNavigation=hidden'
       'Post-Training': '',        // <-- Paste URL and append '?pageNavigation=hidden'
       'Pre-Matching': '',         // <-- Paste URL and append '?pageNavigation=hidden'
-      'Post-Match': ''            // <-- Paste URL and append '?pageNavigation=hidden'
+      'Post-Match': '',            // <-- Paste URL and append '?pageNavigation=hidden'
+      'Churn Data': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_xevgdwhf4d?pageNavigation=hidden'            // <-- Paste URL and append '?pageNavigation=hidden'
     };
 
     function App() {
@@ -184,6 +185,10 @@
                 { 
                   id: 'Post-Match', 
                   icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' 
+                },
+                { 
+                  id: 'Churn Data', 
+                  icon: 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' 
                 }
               ].map((item) => {
                 const isActive = selectedTab === item.id;
