@@ -16,6 +16,17 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+  <!-- Babel Configuration -->
+  <script>
+    // Explicitly force Babel to use the "classic" React runtime.
+    // This prevents the "Cannot use import statement outside a module" error in standalone setups.
+    Babel.registerPreset('react-standalone', {
+      presets: [
+        [Babel.availablePresets['react'], { runtime: 'classic' }]
+      ]
+    });
+  </script>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -64,7 +75,8 @@
   
   <div id="root"></div>
 
-  <script type="text/babel">
+  <!-- Note the data-presets attribute referencing our custom runtime configuration -->
+  <script type="text/babel" data-presets="react-standalone">
     const { useState, useEffect } = React;
 
     // =========================================================================
@@ -76,7 +88,7 @@
       'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
       'Training': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_tu8qg2e43d?pageNavigation=hidden', // <-- Paste URL and append '?pageNavigation=hidden'
       'Pre-Matching': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_zu5a8w613d?pageNavigation=hidden',         // <-- Paste URL and append '?pageNavigation=hidden'
-      'Post-Match': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_phk7g5d33d',            // <-- Paste URL and append '?pageNavigation=hidden'
+      'Post-Match': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_phk7g5d33d?pageNavigation=hidden',            // <-- Paste URL and append '?pageNavigation=hidden'
       'Churn Data': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_xevgdwhf4d?pageNavigation=hidden'            // <-- Paste URL and append '?pageNavigation=hidden'
     };
 
