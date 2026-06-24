@@ -282,8 +282,12 @@
                   <span className="text-[10px] px-2 py-0.5 bg-[#8F6B3E]/20 text-[#C8A46B] border border-[#8F6B3E]/40 rounded font-mono uppercase tracking-widest">
                     CODEX 2.0 Portal
                   </span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 glow-dot animate-pulse"></span>
-                  <span className="text-xs text-[#A7B5AC] font-mono tracking-wide">Live</span>
+                  
+                  {/* Nested spacing container to pull the green dot and "Live" text closer together */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 glow-dot animate-pulse"></span>
+                    <span className="text-xs text-[#A7B5AC] font-mono tracking-wide">Live</span>
+                  </div>
                 </div>
                 <h2 className="text-xs font-serif font-semibold text-[#F5F3EE] tracking-tight uppercase">
                   {selectedTab}
