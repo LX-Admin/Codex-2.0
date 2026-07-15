@@ -68,36 +68,6 @@
     .pulse-light {
       animation: pulse-slow 3s infinite;
     }
-
-    /* Print Styles */
-    @media print {
-      aside, 
-      header, 
-      footer, 
-      .alert-toast {
-        display: none !important;
-      }
-      body, 
-      #root, 
-      main {
-        background: #021E16 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: visible !important;
-      }
-      iframe {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        border: none !important;
-      }
-      @page {
-        size: A4 landscape;
-        margin: 0;
-      }
-    }
   </style>
 </head>
 <body class="bg-[#021E16] text-[#F5F3EE] overflow-x-hidden selection:bg-[#C8A46B] selection:text-[#021E16]">
@@ -328,16 +298,6 @@
                       <line x1="12" y1="3" x2="12" y2="21" />
                     </svg>
                     Split View
-                  </button>
-
-                  <button 
-                    onClick={() => window.print()}
-                    className="p-1.5 rounded bg-[#021E16]/60 border border-[#8F6B3E]/40 text-[#A7B5AC] hover:border-[#C8A46B] hover:text-[#C8A46B] transition-colors alert-toast"
-                    title="Print / Export View"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
                   </button>
                 </div>
               </header>
