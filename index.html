@@ -81,6 +81,7 @@
 
     const LOOKER_STUDIO_URLS = {
       'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
+      'Pre-Training': '', // <-- URL placeholder added here
       'Training': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_tu8qg2e43d?pageNavigation=hidden',
       'Pre-Matching': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_zu5a8w613d?pageNavigation=hidden',
       'Post-Match': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_phk7g5d33d?pageNavigation=hidden',
@@ -192,6 +193,7 @@
                 
                 {[
                   { id: 'LX Performance', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+                  { id: 'Pre-Training', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
                   { id: 'Training', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
                   { id: 'Pre-Matching', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
                   { id: 'Post-Match', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
@@ -227,7 +229,7 @@
                 })}
               </nav>
 
-              {/* PERSISTENT FOOTER FOR RAW DATA */}
+              {}
               <div className="p-3 border-t border-[#8F6B3E]/20 shrink-0">
                 <a 
                   href={RAW_DATA_URL}
@@ -259,9 +261,7 @@
             </aside>
           )}
 
-          {/* ==========================================
-              MAIN CONTENT WORKSPACE
-              ========================================== */}
+          {}
           <main className="flex-1 flex flex-col min-w-0 bg-[#021E16] h-screen overflow-hidden">
             
             <div className="flex-1 w-full flex flex-col h-full overflow-hidden border-x border-[#8F6B3E]/10">
@@ -274,7 +274,6 @@
                       CODEX 2.0 Portal
                     </span>
                     
-                    {/* UPDATE 2: Red Under Maintenance Dot & Text with original styling */}
                     <div className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_#ef4444] animate-pulse"></span>
                       <span className="text-xs text-[#A7B5AC] font-mono tracking-wide">Under Maintenance</span>
@@ -283,7 +282,6 @@
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* UPDATE 3: Standard Split View Icon Button */}
                   <button 
                     onClick={toggleSplitView}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
@@ -308,7 +306,7 @@
                 </div>
               )}
 
-              {/* DYNAMIC FRAME VIEWPORT (Edge-to-Edge Canvas Area) */}
+              {}
               <div className="flex-1 w-full bg-[#021E16] overflow-hidden min-h-0 relative flex flex-row">
                 
                 {/* PRIMARY PANEL */}
@@ -341,14 +339,18 @@
                         ></iframe>
                       </div>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center p-6 text-center">
-                        <p className="text-xs text-[#A7B5AC]">Data synchronization in progress...</p>
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
+                        <svg className="w-12 h-12 text-[#8F6B3E]/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <p className="text-xs font-serif tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
+                        <p className="text-[10px] text-[#A7B5AC]">Data Studio link for {selectedTab} is being configured...</p>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* SECONDARY PANEL (Only rendered if Split View is active) */}
+                {}
                 {isSplitView && (
                   <div className="relative flex flex-col h-full w-1/2 shrink-0 overflow-hidden bg-[#01140E]">
                     
@@ -377,8 +379,12 @@
                           ></iframe>
                         </div>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center p-6 text-center">
-                          <p className="text-xs text-[#A7B5AC]">Data synchronization in progress...</p>
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
+                          <svg className="w-12 h-12 text-[#8F6B3E]/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                          </svg>
+                          <p className="text-xs font-serif tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
+                          <p className="text-[10px] text-[#A7B5AC]">Data Studio link for {comparisonTab} is being configured...</p>
                         </div>
                       )}
                     </div>
