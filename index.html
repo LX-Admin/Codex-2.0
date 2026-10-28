@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CODEX 2.0 - Live Interactive Preview</title>
+  <title>Training Performance Dashboard</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,6 +18,7 @@
 
   <!-- Babel Configuration -->
   <script>
+    // Explicitly force Babel to use the "classic" React runtime.
     Babel.registerPreset('react-standalone', {
       presets: [
         [Babel.availablePresets['react'], { runtime: 'classic' }]
@@ -78,7 +79,7 @@
 
     const RAW_DATA_URL = 'https://docs.google.com/spreadsheets/d/17pl95MG7qbn4NGn_YookTwkAYTopBUIvZj7jyq_Kcq0/edit?usp=drive_link';
 
-    // Live Looker Studio embed URLs
+    // Added EA Journey at the very top as requested!
     const LOOKER_STUDIO_URLS = {
       'EA Journey': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_wkqgjo6n4d?pageNavigation=hidden', 
       'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
@@ -87,43 +88,22 @@
       'Pre-Matching': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_zu5a8w613d?pageNavigation=hidden',
       'Post-Match': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_phk7g5d33d?pageNavigation=hidden',
       'Churn Data': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_xevgdwhf4d?pageNavigation=hidden',
-      'LX Pilot Classes': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_vl1ngeyp8d?pageNavigation=hidden'
+      'LX Pilot: No CRC': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_vl1ngeyp8d?pageNavigation=hidden',
+      'LX Pilot: FVC': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_yk9yd3uq8d?pageNavigation=hidden',
+      'LX Pilot: Hybrid Setup': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_4py806wq8d?pageNavigation=hidden'
     };
 
     const TAB_OPTIONS = Object.keys(LOOKER_STUDIO_URLS);
 
-    // Helpers to convert tab labels to URL-safe hash strings and back
-    const tabToHash = (tabName) => tabName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const getTabFromHash = () => {
-      const rawHash = window.location.hash.replace('#', '').toLowerCase();
-      if (!rawHash) return null;
-      return TAB_OPTIONS.find(tab => tabToHash(tab) === rawHash) || null;
-    };
-
     function App() {
-      // Determine initial tab from window.location.hash, or default to 'LX Performance'
-      const [selectedTab, setSelectedTab] = useState(() => {
-        return getTabFromHash() || 'LX Performance';
-      });
+      // STATE MANAGEMENT
+      const [selectedTab, setSelectedTab] = useState('LX Performance'); // Boot up with LX Performance so it's not empty on load
       const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
       const [systemAlert, setSystemAlert] = useState(null);
       
       // Split View State
       const [isSplitView, setIsSplitView] = useState(false);
       const [comparisonTab, setComparisonTab] = useState(TAB_OPTIONS[1] || TAB_OPTIONS[0]);
-
-      // Handle browser back/forward and hash changes
-      useEffect(() => {
-        const handleHashChange = () => {
-          const tabFromURL = getTabFromHash();
-          if (tabFromURL && tabFromURL !== selectedTab) {
-            setSelectedTab(tabFromURL);
-          }
-        };
-
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
-      }, [selectedTab]);
 
       // Automatically collapse sidebar on smaller screens
       useEffect(() => {
@@ -144,9 +124,6 @@
 
       const handleTabSelect = (tabId) => {
         setSelectedTab(tabId);
-        // Push hash state into URL for deep linking & bookmarking
-        window.location.hash = tabToHash(tabId);
-        
         if (!isSplitView) {
           triggerAlert(`Switched to active view: "${tabId}"`);
         }
@@ -218,7 +195,9 @@
                   { id: 'Pre-Matching', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
                   { id: 'Post-Match', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
                   { id: 'Churn Data', icon: 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' },
-                  { id: 'LX Pilot Classes', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' }
+                  { id: 'LX Pilot: No CRC', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+                  { id: 'LX Pilot: FVC', icon: 'M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z' },
+                  { id: 'LX Pilot: Hybrid Setup', icon: 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z' }
                 ].map((item) => {
                   const isActive = selectedTab === item.id;
                   return (
@@ -294,9 +273,9 @@
                       CODEX 2.0 Portal
                     </span>
                     
-                    <div className="flex items-center gap-1.5" title="All Systems Operational">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
-                      <span className="text-xs text-[#A7B5AC] font-mono tracking-wide">Live</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_#ef4444] animate-pulse"></span>
+                      <span className="text-xs text-[#A7B5AC] font-mono tracking-wide">Under Maintenance</span>
                     </div>
                   </div>
                 </div>
@@ -364,7 +343,9 @@
                         </svg>
                         <p className="text-xs font-serif tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
                         <p className="text-[10px] text-[#A7B5AC] max-w-xs mt-1">
-                          Data Studio link for {selectedTab} is being configured...
+                          {selectedTab === 'EA Journey' 
+                            ? "This dataset has requested PTO. It will return to work once its Looker Studio link is configured." 
+                            : `Data Studio link for ${selectedTab} is being configured...`}
                         </p>
                       </div>
                     )}
@@ -406,7 +387,9 @@
                           </svg>
                           <p className="text-xs font-serif tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
                           <p className="text-[10px] text-[#A7B5AC] max-w-xs mt-1">
-                            Data Studio link for {comparisonTab} is being configured...
+                            {comparisonTab === 'EA Journey' 
+                              ? "This dataset has requested PTO. It will return to work once its Looker Studio link is configured." 
+                              : `Data Studio link for ${comparisonTab} is being configured...`}
                           </p>
                         </div>
                       )}
