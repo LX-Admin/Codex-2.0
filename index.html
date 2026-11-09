@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>CODEX 2.0 - Executive Training Dashboard v2</title>
   
-  <!-- Google Analytics 4 (GA4) - Web Stream: https://lx-admin.github.io/Codex-2.0/ -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FG3C70FT5N"></script>
+  <!-- Google Tag Manager (Container: GTM-WJCHNPVJ) -->
+  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-WJCHNPVJ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-FG3C70FT5N', {
-      send_page_view: true
-    });
   </script>
 
   <!-- Tailwind CSS CDN -->
@@ -153,15 +150,24 @@
       'LX Pilot: Hybrid Setup': 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z'
     };
 
-    const tabToHash = (tabName) => tabName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const getTabFromHash = () => {
+    const tabToSlug = (tabName) => tabName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const getTabFromURL = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam) {
+        const found = TAB_OPTIONS.find(t => tabToSlug(t) === tabParam.toLowerCase());
+        if (found) return found;
+      }
       const rawHash = window.location.hash.replace('#', '').toLowerCase();
-      if (!rawHash) return null;
-      return TAB_OPTIONS.find(tab => tabToHash(tab) === rawHash) || null;
+      if (rawHash) {
+        const foundHash = TAB_OPTIONS.find(t => tabToSlug(t) === rawHash);
+        if (foundHash) return foundHash;
+      }
+      return null;
     };
 
     function App() {
-      const [selectedTab, setSelectedTab] = useState(() => getTabFromHash() || 'LX Performance');
+      const [selectedTab, setSelectedTab] = useState(() => getTabFromURL() || 'LX Performance');
       const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
       const [systemAlert, setSystemAlert] = useState(null);
       const [isTransitioning, setIsTransitioning] = useState(false);
@@ -183,16 +189,16 @@
         return () => window.removeEventListener('mousemove', handleMouseMove);
       }, []);
 
-      // Hash change listener for browser navigation
+      // Browser history popstate listener for back/forward navigation
       useEffect(() => {
-        const handleHashChange = () => {
-          const tabFromURL = getTabFromHash();
-          if (tabFromURL && tabFromURL !== selectedTab) {
-            handleTabSelect(tabFromURL, false);
+        const handlePopState = () => {
+          const tabFromNav = getTabFromURL();
+          if (tabFromNav && tabFromNav !== selectedTab) {
+            handleTabSelect(tabFromNav, false);
           }
         };
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
       }, [selectedTab]);
 
       // Auto-collapse sidebar on smaller screens
@@ -212,18 +218,19 @@
         setTimeout(() => setSystemAlert(null), 3500);
       };
 
-      const handleTabSelect = (tabId, updateHash = true) => {
+      const handleTabSelect = (tabId, updateUrl = true) => {
         if (tabId === selectedTab) return;
         
-        // Trigger smooth transition shimmer veil
         setIsTransitioning(true);
         setSelectedTab(tabId);
         
-        if (updateHash) {
-          window.location.hash = tabToHash(tabId);
+        if (updateUrl) {
+          const slug = tabToSlug(tabId);
+          const newUrl = `${window.location.pathname}?tab=${slug}`;
+          window.history.pushState({ tab: slug }, '', newUrl);
         }
 
-        // Send telemetry event to Google Analytics
+        // Send telemetry event via dataLayer / gtag
         if (typeof gtag === 'function') {
           gtag('event', 'select_content', {
             content_type: 'dashboard_tab',
@@ -237,7 +244,6 @@
           triggerAlert(`Mounted view: ${tabId}`);
         }
 
-        // Dissolve transition shimmer smoothly
         setTimeout(() => {
           setIsTransitioning(false);
         }, 320);
