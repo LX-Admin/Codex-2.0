@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>CODEX 2.0 - Executive Training Dashboard v2</title>
   
-  <!-- Google Tag Manager (Container: GTM-WJCHNPVJ) -->
+  <!-- Google tag (gtag.js) & Google Tag Manager Container -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FG3C70FT5N"></script>
   <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-WJCHNPVJ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
+
+    // Configure GA4 measurement and fire immediate page view hit
+    gtag('config', 'G-FG3C70FT5N', {
+      send_page_view: true
+    });
   </script>
 
   <!-- Tailwind CSS CDN -->
@@ -57,7 +63,7 @@
       font-family: 'Cinzel', serif;
     }
 
-    /* Custom Ardena-inspired Glass Panel */
+    /* Ardena-inspired Glass Panel */
     .ardena-glass {
       background: var(--brand-panel);
       backdrop-filter: blur(20px) saturate(180%);
@@ -72,7 +78,7 @@
       border: 1px solid rgba(143, 107, 62, 0.22);
     }
 
-    /* Subtle cursor glow backdrop */
+    /* Subtle cursor glow specular backdrop */
     .glow-canvas {
       background: radial-gradient(circle 900px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(200, 164, 107, 0.04), transparent 60%);
     }
@@ -102,12 +108,7 @@
       animation: shimmer-sweep 1.8s infinite;
     }
 
-    /* Active Pill transitions */
-    .tab-pill-enter {
-      transition: all 0.38s var(--ease-fluid);
-    }
-
-    /* Split panel smooth morph */
+    /* Split panel smooth morphing */
     .split-panel-anim {
       transition: width 0.45s var(--ease-fluid), flex 0.45s var(--ease-fluid), opacity 0.3s ease;
     }
@@ -151,17 +152,20 @@
     };
 
     const tabToSlug = (tabName) => tabName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    
     const getTabFromURL = () => {
+      // Priority 1: Query parameter '?tab='
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get('tab');
       if (tabParam) {
-        const found = TAB_OPTIONS.find(t => tabToSlug(t) === tabParam.toLowerCase());
-        if (found) return found;
+        const match = TAB_OPTIONS.find(t => tabToSlug(t) === tabParam.toLowerCase());
+        if (match) return match;
       }
+      // Priority 2: Hash fragment fallback
       const rawHash = window.location.hash.replace('#', '').toLowerCase();
       if (rawHash) {
-        const foundHash = TAB_OPTIONS.find(t => tabToSlug(t) === rawHash);
-        if (foundHash) return foundHash;
+        const matchHash = TAB_OPTIONS.find(t => tabToSlug(t) === rawHash);
+        if (matchHash) return matchHash;
       }
       return null;
     };
@@ -176,7 +180,7 @@
       const [isSplitView, setIsSplitView] = useState(false);
       const [comparisonTab, setComparisonTab] = useState(TAB_OPTIONS[1] || TAB_OPTIONS[0]);
 
-      // Subtle dynamic specular cursor follower
+      // Dynamic specular cursor follower
       const rootRef = useRef(null);
       useEffect(() => {
         const handleMouseMove = (e) => {
@@ -189,7 +193,7 @@
         return () => window.removeEventListener('mousemove', handleMouseMove);
       }, []);
 
-      // Browser history popstate listener for back/forward navigation
+      // Browser popstate handler for back/forward buttons
       useEffect(() => {
         const handlePopState = () => {
           const tabFromNav = getTabFromURL();
@@ -201,7 +205,7 @@
         return () => window.removeEventListener('popstate', handlePopState);
       }, [selectedTab]);
 
-      // Auto-collapse sidebar on smaller screens
+      // Responsive sidebar collapse on smaller screens
       useEffect(() => {
         const handleResize = () => {
           if (window.innerWidth < 1366) {
@@ -230,18 +234,20 @@
           window.history.pushState({ tab: slug }, '', newUrl);
         }
 
-        // Send telemetry event via dataLayer / gtag
+        // Fire Google Analytics page view & custom selection event
         if (typeof gtag === 'function') {
-          gtag('event', 'select_content', {
-            content_type: 'dashboard_tab',
-            item_id: tabId,
+          gtag('event', 'page_view', {
             page_title: `CODEX 2.0 - ${tabId}`,
             page_location: window.location.href
+          });
+          gtag('event', 'select_content', {
+            content_type: 'dashboard_tab',
+            item_id: tabId
           });
         }
 
         if (!isSplitView) {
-          triggerAlert(`Mounted view: ${tabId}`);
+          triggerAlert(`Switched to: ${tabId}`);
         }
 
         setTimeout(() => {
@@ -262,7 +268,7 @@
           });
         }
 
-        triggerAlert(nextState ? "Split comparison view engaged" : "Single workspace view restored");
+        triggerAlert(nextState ? "Split Comparison View Engaged" : "Single Workspace View Restored");
       };
 
       const activeEmbedUrlPrimary = LOOKER_STUDIO_URLS[selectedTab];
@@ -272,7 +278,7 @@
         <div ref={rootRef} className="glow-canvas h-screen w-screen bg-[#021812] text-[#F5F3EE] font-sans antialiased flex flex-col md:flex-row overflow-hidden select-none relative">
           
           {/* =========================================================
-              ARDENA-STYLE COLLAPSIBLE SIDEBAR WITH FLOATING ACTIVE PILL
+              COLLAPSIBLE SIDEBAR WITH ARDENA SPECULAR ACCENTS
               ========================================================= */}
           {!isSplitView && (
             <aside className={`shrink-0 ardena-glass border-r border-[#8F6B3E]/30 flex flex-col z-20 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
@@ -307,7 +313,7 @@
                 </button>
               </div>
 
-              {/* Navigation Rail with Ardena Magnetic Pill Animation */}
+              {/* Navigation Rail with Magnetic Active Indicator */}
               <nav className="flex-1 p-2.5 space-y-1.5 overflow-y-auto relative">
                 {!sidebarCollapsed && (
                   <div className="px-3 pt-2 pb-1.5 flex items-center justify-between">
@@ -335,7 +341,7 @@
                       }`}
                       title={sidebarCollapsed ? tabId : ""}
                     >
-                      {/* Active Left Indicator Bar */}
+                      {/* Active Indicator Bar */}
                       {isActive && (
                         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r bg-[#C8A46B] shadow-[0_0_8px_#C8A46B]"></span>
                       )}
@@ -471,7 +477,7 @@
                 )}
 
                 <div className="flex-1 w-full relative">
-                  {/* Glassmorphic Shimmer Veil (Dissolves when frame stabilizes) */}
+                  {/* Glassmorphic Shimmer Veil */}
                   {isTransitioning && (
                     <div className="absolute inset-0 z-30 ardena-glass flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300">
                       <div className="w-32 h-1 bg-[#063328] rounded-full overflow-hidden relative">
@@ -538,24 +544,24 @@
                       <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
                         <svg className="w-10 h-10 text-[#8F6B3E]/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
-                        <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
-                          Report link for {comparisonTab} is being provisioned.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                      </svg>
+                      <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
+                      <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
+                        Report link for {comparisonTab} is being provisioned.
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </main>
-        </div>
-      );
-    }
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<App />);
+</script>
 </body>
 </html>
