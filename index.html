@@ -3,13 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Training Performance Dashboard</title>
+  <title>CODEX 2.0 - Executive Training Dashboard v2</title>
   
+  <!-- Google Analytics 4 (GA4) - Web Stream: https://lx-admin.github.io/Codex-2.0/ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FG3C70FT5N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FG3C70FT5N', {
+      send_page_view: true
+    });
+  </script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Premium Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- React & Babel Standalone CDNs -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -18,7 +31,6 @@
 
   <!-- Babel Configuration -->
   <script>
-    // Explicitly force Babel to use the "classic" React runtime.
     Babel.registerPreset('react-standalone', {
       presets: [
         [Babel.availablePresets['react'], { runtime: 'classic' }]
@@ -27,59 +39,92 @@
   </script>
 
   <style>
+    :root {
+      --brand-canvas: #021812;
+      --brand-panel: rgba(6, 32, 25, 0.72);
+      --brand-gold: #C8A46B;
+      --brand-gold-glow: rgba(200, 164, 107, 0.18);
+      --brand-bronze: rgba(143, 107, 62, 0.35);
+      --brand-cream: #F5F3EE;
+      --brand-muted: #8F9E96;
+      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     body {
       font-family: 'Inter', sans-serif;
+      background-color: var(--brand-canvas);
+      color: var(--brand-cream);
     }
-    .font-serif {
-      font-family: 'Playfair Display', serif;
+
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
     }
+
+    /* Custom Ardena-inspired Glass Panel */
+    .ardena-glass {
+      background: var(--brand-panel);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--brand-bronze);
+    }
+
+    .ardena-glass-subtle {
+      background: rgba(4, 24, 18, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(143, 107, 62, 0.22);
+    }
+
+    /* Subtle cursor glow backdrop */
+    .glow-canvas {
+      background: radial-gradient(circle 900px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(200, 164, 107, 0.04), transparent 60%);
+    }
+
+    /* Scrollbars */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
     }
     ::-webkit-scrollbar-track {
-      background: #021E16;
+      background: #021812;
     }
     ::-webkit-scrollbar-thumb {
-      background: #8F6B3E;
-      border-radius: 3px;
+      background: rgba(143, 107, 62, 0.45);
+      border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #C8A46B;
     }
-    .glass-panel {
-      background: rgba(10, 43, 34, 0.45);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(143, 107, 62, 0.25);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+
+    /* Shimmer animation for view loading transition */
+    @keyframes shimmer-sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
-    .gold-border-glow:hover {
-      border-color: rgba(200, 164, 107, 0.8);
-      box-shadow: 0 0 15px rgba(200, 164, 107, 0.15);
+    .animate-shimmer {
+      animation: shimmer-sweep 1.8s infinite;
     }
-    .glow-dot {
-      box-shadow: 0 0 10px #C8A46B;
+
+    /* Active Pill transitions */
+    .tab-pill-enter {
+      transition: all 0.38s var(--ease-fluid);
     }
-    @keyframes pulse-slow {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .pulse-light {
-      animation: pulse-slow 3s infinite;
+
+    /* Split panel smooth morph */
+    .split-panel-anim {
+      transition: width 0.45s var(--ease-fluid), flex 0.45s var(--ease-fluid), opacity 0.3s ease;
     }
   </style>
 </head>
-<body class="bg-[#021E16] text-[#F5F3EE] overflow-x-hidden selection:bg-[#C8A46B] selection:text-[#021E16]">
+<body class="bg-[#021812] text-[#F5F3EE] overflow-hidden select-none selection:bg-[#C8A46B] selection:text-[#021812]">
   
   <div id="root"></div>
 
   <script type="text/babel" data-presets="react-standalone">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     const RAW_DATA_URL = 'https://docs.google.com/spreadsheets/d/17pl95MG7qbn4NGn_YookTwkAYTopBUIvZj7jyq_Kcq0/edit?usp=drive_link';
 
-    // Added EA Journey at the very top as requested!
     const LOOKER_STUDIO_URLS = {
       'EA Journey': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_wkqgjo6n4d?pageNavigation=hidden', 
       'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
@@ -95,17 +140,62 @@
 
     const TAB_OPTIONS = Object.keys(LOOKER_STUDIO_URLS);
 
+    const TAB_ICONS = {
+      'EA Journey': 'M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5',
+      'LX Performance': 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+      'Pre-Training': 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
+      'Training': 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+      'Pre-Matching': 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+      'Post-Match': 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1',
+      'Churn Data': 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6',
+      'LX Pilot: No CRC': 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+      'LX Pilot: FVC': 'M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z',
+      'LX Pilot: Hybrid Setup': 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z'
+    };
+
+    const tabToHash = (tabName) => tabName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const getTabFromHash = () => {
+      const rawHash = window.location.hash.replace('#', '').toLowerCase();
+      if (!rawHash) return null;
+      return TAB_OPTIONS.find(tab => tabToHash(tab) === rawHash) || null;
+    };
+
     function App() {
-      // STATE MANAGEMENT
-      const [selectedTab, setSelectedTab] = useState('LX Performance'); // Boot up with LX Performance so it's not empty on load
+      const [selectedTab, setSelectedTab] = useState(() => getTabFromHash() || 'LX Performance');
       const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
       const [systemAlert, setSystemAlert] = useState(null);
+      const [isTransitioning, setIsTransitioning] = useState(false);
       
       // Split View State
       const [isSplitView, setIsSplitView] = useState(false);
       const [comparisonTab, setComparisonTab] = useState(TAB_OPTIONS[1] || TAB_OPTIONS[0]);
 
-      // Automatically collapse sidebar on smaller screens
+      // Subtle dynamic specular cursor follower
+      const rootRef = useRef(null);
+      useEffect(() => {
+        const handleMouseMove = (e) => {
+          if (!rootRef.current) return;
+          const { clientX, clientY } = e;
+          rootRef.current.style.setProperty('--mouse-x', `${clientX}px`);
+          rootRef.current.style.setProperty('--mouse-y', `${clientY}px`);
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+      }, []);
+
+      // Hash change listener for browser navigation
+      useEffect(() => {
+        const handleHashChange = () => {
+          const tabFromURL = getTabFromHash();
+          if (tabFromURL && tabFromURL !== selectedTab) {
+            handleTabSelect(tabFromURL, false);
+          }
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+      }, [selectedTab]);
+
+      // Auto-collapse sidebar on smaller screens
       useEffect(() => {
         const handleResize = () => {
           if (window.innerWidth < 1366) {
@@ -119,140 +209,175 @@
 
       const triggerAlert = (message) => {
         setSystemAlert(message);
-        setTimeout(() => setSystemAlert(null), 4000);
+        setTimeout(() => setSystemAlert(null), 3500);
       };
 
-      const handleTabSelect = (tabId) => {
+      const handleTabSelect = (tabId, updateHash = true) => {
+        if (tabId === selectedTab) return;
+        
+        // Trigger smooth transition shimmer veil
+        setIsTransitioning(true);
         setSelectedTab(tabId);
-        if (!isSplitView) {
-          triggerAlert(`Switched to active view: "${tabId}"`);
+        
+        if (updateHash) {
+          window.location.hash = tabToHash(tabId);
         }
+
+        // Send telemetry event to Google Analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'select_content', {
+            content_type: 'dashboard_tab',
+            item_id: tabId,
+            page_title: `CODEX 2.0 - ${tabId}`,
+            page_location: window.location.href
+          });
+        }
+
+        if (!isSplitView) {
+          triggerAlert(`Mounted view: ${tabId}`);
+        }
+
+        // Dissolve transition shimmer smoothly
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 320);
       };
 
       const toggleSplitView = () => {
-        setIsSplitView(!isSplitView);
-        if (!isSplitView) {
-          triggerAlert("Split Comparison View Enabled");
-        } else {
-          triggerAlert("Returned to Single View");
+        const nextState = !isSplitView;
+        setIsSplitView(nextState);
+
+        // Track split-view usage in Google Analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'toggle_split_view', {
+            is_split: nextState,
+            primary_view: selectedTab,
+            comparison_view: comparisonTab
+          });
         }
+
+        triggerAlert(nextState ? "Split comparison view engaged" : "Single workspace view restored");
       };
 
       const activeEmbedUrlPrimary = LOOKER_STUDIO_URLS[selectedTab];
       const activeEmbedUrlSecondary = LOOKER_STUDIO_URLS[comparisonTab];
 
       return (
-        <div className="h-screen w-screen bg-[#021E16] text-[#F5F3EE] font-sans antialiased flex flex-col md:flex-row overflow-hidden select-none">
+        <div ref={rootRef} className="glow-canvas h-screen w-screen bg-[#021812] text-[#F5F3EE] font-sans antialiased flex flex-col md:flex-row overflow-hidden select-none relative">
           
-          {/* COLLAPSIBLE LEFT SIDEBAR NAVIGATION (Hidden in Split View) */}
+          {/* =========================================================
+              ARDENA-STYLE COLLAPSIBLE SIDEBAR WITH FLOATING ACTIVE PILL
+              ========================================================= */}
           {!isSplitView && (
-            <aside className={`shrink-0 bg-[#0A2B22]/90 border-r border-[#8F6B3E]/30 flex flex-col z-20 transition-all duration-300 ${
-              sidebarCollapsed ? 'w-full md:w-20' : 'w-full md:w-56'
+            <aside className={`shrink-0 ardena-glass border-r border-[#8F6B3E]/30 flex flex-col z-20 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              sidebarCollapsed ? 'w-full md:w-20' : 'w-full md:w-60'
             }`}>
-              <div className={`p-4 md:p-5 border-b border-[#8F6B3E]/30 flex transition-all duration-300 ${
-                sidebarCollapsed ? 'flex-col items-center gap-4' : 'items-center justify-between'
+              
+              {/* Brand Header */}
+              <div className={`p-4 md:p-5 border-b border-[#8F6B3E]/25 flex transition-all duration-300 ${
+                sidebarCollapsed ? 'flex-col items-center gap-3' : 'items-center justify-between'
               }`}>
-                <div className="flex items-center gap-3 overflow-hidden">
-                  
-                  <div className="w-9 h-9 relative shrink-0 flex items-center justify-center bg-[#063328] rounded-full border border-[#C8A46B]/40 shadow-[0_0_10px_rgba(200,164,107,0.2)]">
-                    <svg className="w-5 h-5 text-[#C8A46B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <div className="flex items-center gap-3 overflow-hidden group">
+                  <div className="w-9 h-9 relative shrink-0 flex items-center justify-center bg-gradient-to-br from-[#063328] to-[#021E16] rounded-xl border border-[#C8A46B]/40 shadow-[0_0_14px_rgba(200,164,107,0.22)] transition-transform duration-300 group-hover:scale-105">
+                    <svg className="w-5 h-5 text-[#C8A46B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
                     </svg>
                   </div>
                   
                   <div className={`transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-full'}`}>
-                    <h1 className="text-lg font-bold tracking-widest text-[#F5F3EE] uppercase font-serif whitespace-nowrap">CODEX</h1>
-                    <p className="text-[10px] text-[#A7B5AC] tracking-wider uppercase whitespace-nowrap">LX Dashboard</p>
+                    <h1 className="text-base font-bold tracking-[0.2em] text-[#F5F3EE] uppercase font-cinzel whitespace-nowrap">CODEX 2.0</h1>
+                    <p className="text-[9px] text-[#A7B5AC] tracking-widest uppercase whitespace-nowrap font-mono opacity-80">Executive Analytics</p>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  className={`hidden md:flex p-1.5 rounded border border-[#8F6B3E]/40 hover:border-[#C8A46B] text-[#C8A46B] bg-[#021E16]/60 transition-colors cursor-pointer shrink-0 ${
-                    sidebarCollapsed ? 'mt-1' : ''
-                  }`}
+                  className="hidden md:flex p-1.5 rounded-lg border border-[#8F6B3E]/35 hover:border-[#C8A46B] text-[#C8A46B] bg-[#021812]/70 hover:bg-[#063328]/60 transition-all duration-200 cursor-pointer shrink-0 shadow-sm hover:scale-105"
                   title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                 >
-                  <svg className={`w-4 h-4 transform transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <svg className={`w-3.5 h-3.5 transform transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                   </svg>
                 </button>
               </div>
 
-              {/* Navigation Tabs */}
-              <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
+              {/* Navigation Rail with Ardena Magnetic Pill Animation */}
+              <nav className="flex-1 p-2.5 space-y-1.5 overflow-y-auto relative">
                 {!sidebarCollapsed && (
-                  <p className="px-3 py-2 text-[11px] font-bold text-[#8F6B3E] tracking-widest uppercase transition-opacity duration-300">
-                    Analytics Hub
-                  </p>
+                  <div className="px-3 pt-2 pb-1.5 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-[#8F6B3E] tracking-[0.2em] uppercase font-mono">
+                      Modules
+                    </span>
+                    <span className="text-[9px] text-[#C8A46B]/60 font-mono">10</span>
+                  </div>
                 )}
                 
-                {[
-                  { id: 'EA Journey', icon: 'M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5' },
-                  { id: 'LX Performance', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-                  { id: 'Pre-Training', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
-                  { id: 'Training', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-                  { id: 'Pre-Matching', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-                  { id: 'Post-Match', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
-                  { id: 'Churn Data', icon: 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' },
-                  { id: 'LX Pilot: No CRC', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-                  { id: 'LX Pilot: FVC', icon: 'M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z' },
-                  { id: 'LX Pilot: Hybrid Setup', icon: 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z' }
-                ].map((item) => {
-                  const isActive = selectedTab === item.id;
+                {TAB_OPTIONS.map((tabId) => {
+                  const isActive = selectedTab === tabId;
+                  const iconPath = TAB_ICONS[tabId] || 'M13 10V3L4 14h7v7l9-11h-7z';
+                  
                   return (
                     <button
-                      key={item.id}
-                      onClick={() => handleTabSelect(item.id)}
-                      className={`w-full flex items-center rounded transition-all duration-200 cursor-pointer ${
-                        sidebarCollapsed ? 'justify-center py-3' : 'justify-between px-3 py-2'
+                      key={tabId}
+                      onClick={() => handleTabSelect(tabId)}
+                      className={`group w-full relative flex items-center rounded-xl transition-all duration-300 cursor-pointer overflow-hidden ${
+                        sidebarCollapsed ? 'justify-center py-2.5' : 'justify-between px-3 py-2.5'
                       } ${
                         isActive 
-                          ? 'bg-[#063328] text-[#C8A46B] border-l-2 border-[#C8A46B] font-medium' 
-                          : 'text-[#A7B5AC] hover:text-[#F5F3EE] hover:bg-[#063328]/50'
+                          ? 'bg-gradient-to-r from-[#063328] via-[#093c30] to-[#04241b] text-[#C8A46B] shadow-[inset_0_1px_0_rgba(200,164,107,0.35),0_4px_12px_rgba(0,0,0,0.3)] border border-[#C8A46B]/30' 
+                          : 'text-[#A7B5AC] hover:text-[#F5F3EE] hover:bg-[#063328]/35 border border-transparent hover:border-[#8F6B3E]/20'
                       }`}
-                      title={sidebarCollapsed ? item.id : ""}
+                      title={sidebarCollapsed ? tabId : ""}
                     >
-                      <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                      {/* Active Left Indicator Bar */}
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r bg-[#C8A46B] shadow-[0_0_8px_#C8A46B]"></span>
+                      )}
+
+                      <div className="flex items-center gap-3 z-10 transition-transform duration-200 group-hover:translate-x-0.5">
+                        <svg className={`w-4 h-4 shrink-0 transition-colors duration-200 ${isActive ? 'text-[#C8A46B]' : 'text-[#8F6B3E] group-hover:text-[#C8A46B]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                          <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
                         </svg>
+                        
                         {!sidebarCollapsed && (
-                          <span className="text-sm whitespace-nowrap transition-all duration-300">{item.id}</span>
+                          <span className={`text-xs whitespace-nowrap tracking-wide transition-colors duration-200 ${isActive ? 'font-semibold text-[#F5F3EE]' : 'font-normal'}`}>
+                            {tabId}
+                          </span>
                         )}
                       </div>
+
                       {!sidebarCollapsed && isActive && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C8A46B] glow-dot"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C8A46B] shadow-[0_0_8px_#C8A46B]"></span>
                       )}
                     </button>
                   );
                 })}
               </nav>
 
-              {/* PERSISTENT FOOTER FOR RAW DATA */}
-              <div className="p-3 border-t border-[#8F6B3E]/20 shrink-0">
+              {/* Persistent Raw Spreadsheet Link */}
+              <div className="p-2.5 border-t border-[#8F6B3E]/20 shrink-0">
                 <a 
                   href={RAW_DATA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-full flex items-center rounded transition-all duration-200 hover:bg-[#063328]/50 hover:text-[#C8A46B] group border border-[#8F6B3E]/10 bg-[#021E16]/40 ${
-                    sidebarCollapsed ? 'justify-center py-3' : 'justify-between px-3 py-2.5'
+                  className={`w-full flex items-center rounded-xl transition-all duration-300 hover:bg-[#063328]/60 hover:border-[#C8A46B]/40 group border border-[#8F6B3E]/20 bg-[#021812]/50 ${
+                    sidebarCollapsed ? 'justify-center py-2.5' : 'justify-between px-3 py-2'
                   }`}
-                  title="Tinker on Raw Spreadsheet"
+                  title="Open Raw Data Spreadsheet"
                 >
                   <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 shrink-0 text-[#8F6B3E] group-hover:text-[#C8A46B] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <svg className="w-4 h-4 shrink-0 text-[#8F6B3E] group-hover:text-[#C8A46B] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12a2.25 2.25 0 002.25-2.25V3m-16.5 0h16.5m-16.5 0a2.25 2.25 0 012.25-2.25h12A2.25 2.25 0 0118 3m-12 4.5h12m-12 4.5h12M9 16.5v3.75M15 16.5v3.75M3 12h18" />
                     </svg>
                     {!sidebarCollapsed && (
                       <div className="text-left leading-tight">
-                        <p className="text-xs font-semibold text-[#F5F3EE] group-hover:text-[#C8A46B] transition-colors">Raw Data Feed</p>
-                        <p className="text-[9px] text-[#A7B5AC]">Tinker on Sheet</p>
+                        <p className="text-[11px] font-semibold text-[#F5F3EE] group-hover:text-[#C8A46B] transition-colors">Raw Data Feed</p>
+                        <p className="text-[9px] text-[#A7B5AC] font-mono">Google Sheets</p>
                       </div>
                     )}
                   </div>
                   {!sidebarCollapsed && (
-                    <svg className="w-3.5 h-3.5 text-[#8F6B3E] group-hover:text-[#C8A46B] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <svg className="w-3 h-3 text-[#8F6B3E] group-hover:text-[#C8A46B] transition-all transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   )}
@@ -261,75 +386,142 @@
             </aside>
           )}
 
-          <main className="flex-1 flex flex-col min-w-0 bg-[#021E16] h-screen overflow-hidden">
+          {/* =========================================================
+              MAIN CONTENT WORKSPACE & EXECUTIVE CONTROLS
+              ========================================================= */}
+          <main className="flex-1 flex flex-col min-w-0 bg-[#021812] h-screen overflow-hidden">
             
-            <div className="flex-1 w-full flex flex-col h-full overflow-hidden border-x border-[#8F6B3E]/10">
-              
-              {/* COMPACT TOP NAVIGATION BAR */}
-              <header className="bg-[#0A2B22]/95 border-b border-[#8F6B3E]/20 py-2.5 px-4 shrink-0 flex items-center justify-between z-10">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] px-2 py-0.5 bg-[#8F6B3E]/20 text-[#C8A46B] border border-[#8F6B3E]/40 rounded font-mono uppercase tracking-widest">
-                      CODEX 2.0 Portal
-                    </span>
-                    
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_#ef4444] animate-pulse"></span>
-                      <span className="text-xs text-[#A7B5AC] font-mono tracking-wide">Under Maintenance</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={toggleSplitView}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
-                      isSplitView 
-                        ? 'bg-[#063328] border-[#C8A46B] text-[#C8A46B] shadow-[0_0_10px_rgba(200,164,107,0.2)]' 
-                        : 'bg-[#021E16]/60 border-[#8F6B3E]/40 text-[#A7B5AC] hover:border-[#C8A46B] hover:text-[#F5F3EE]'
-                    }`}
-                    title="Compare side-by-side"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                      <line x1="12" y1="3" x2="12" y2="21" />
-                    </svg>
-                    Split View
-                  </button>
-                </div>
-              </header>
-
-              {systemAlert && (
-                <div className="absolute top-16 right-6 bg-[#0A2B22] border-l-4 border-[#C8A46B] p-2.5 text-xs text-[#F5F3EE] rounded shadow-2xl z-50 animate-bounce alert-toast">
-                  {systemAlert}
-                </div>
-              )}
-
-              <div className="flex-1 w-full bg-[#021E16] overflow-hidden min-h-0 relative flex flex-row">
+            {/* Top Bar with Glassmorphic Trim */}
+            <header className="ardena-glass border-b border-[#8F6B3E]/25 py-2.5 px-4 shrink-0 flex items-center justify-between z-10 shadow-lg">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] px-2.5 py-1 bg-gradient-to-r from-[#063328] to-[#0A2B22] text-[#C8A46B] border border-[#8F6B3E]/40 rounded-full font-mono uppercase tracking-widest shadow-sm">
+                  CODEX v2.0
+                </span>
                 
-                {/* PRIMARY PANEL */}
-                <div className={`relative flex flex-col h-full overflow-hidden transition-all duration-300 ${isSplitView ? 'w-1/2 shrink-0 border-r border-[#8F6B3E]/30' : 'w-full'}`}>
-                  
-                  {isSplitView && (
-                    <div className="w-full shrink-0 bg-[#0A2B22]/90 border-b border-[#8F6B3E]/20 p-2 z-10 flex justify-between items-center px-4 backdrop-blur-sm shadow-md">
-                      <span className="text-[10px] font-bold text-[#8F6B3E] tracking-widest uppercase">Primary View</span>
-                      <select 
-                        value={selectedTab} 
-                        onChange={(e) => handleTabSelect(e.target.value)}
-                        className="bg-[#021E16] text-[#C8A46B] border border-[#8F6B3E]/50 rounded text-xs font-serif uppercase px-2 py-1 outline-none focus:border-[#C8A46B] cursor-pointer"
-                      >
-                        {TAB_OPTIONS.map(tab => (
-                          <option key={tab} value={tab}>{tab}</option>
-                        ))}
-                      </select>
+                <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#021812]/60 border border-[#8F6B3E]/20" title="Telemetry Active">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
+                  <span className="text-[11px] text-[#A7B5AC] font-mono tracking-wide">Live Stream</span>
+                </div>
+
+                {!isSplitView && (
+                  <span className="hidden lg:inline text-xs font-cinzel tracking-wider text-[#C8A46B]/90 pl-2 border-l border-[#8F6B3E]/30">
+                    {selectedTab}
+                  </span>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={toggleSplitView}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all duration-300 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] ${
+                    isSplitView 
+                      ? 'bg-gradient-to-r from-[#063328] to-[#0A2B22] border-[#C8A46B] text-[#C8A46B] shadow-[0_0_15px_rgba(200,164,107,0.25)]' 
+                      : 'bg-[#021812]/70 border-[#8F6B3E]/40 text-[#A7B5AC] hover:border-[#C8A46B] hover:text-[#F5F3EE]'
+                  }`}
+                  title="Toggle Side-by-Side Analysis Mode"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="12" y1="3" x2="12" y2="21" />
+                  </svg>
+                  <span>Split View</span>
+                </button>
+              </div>
+            </header>
+
+            {/* Ardena Toast Alert Notification */}
+            {systemAlert && (
+              <div className="absolute top-16 right-6 ardena-glass border border-[#C8A46B]/40 px-3.5 py-2 text-xs text-[#F5F3EE] rounded-xl shadow-2xl z-50 flex items-center gap-2.5 backdrop-blur-xl animate-fade-in">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C8A46B] shadow-[0_0_6px_#C8A46B]"></span>
+                <span className="font-mono text-[11px] tracking-wide text-[#F5F3EE]">{systemAlert}</span>
+              </div>
+            )}
+
+            {/* =========================================================
+                DYNAMIC VIEWPORT WITH GLASS SHIMMER TRANSITION
+                ========================================================= */}
+            <div className="flex-1 w-full bg-[#021812] overflow-hidden min-h-0 relative flex flex-row">
+              
+              {/* PRIMARY PANEL */}
+              <div className={`relative flex flex-col h-full overflow-hidden split-panel-anim ${
+                isSplitView ? 'w-1/2 shrink-0 border-r border-[#8F6B3E]/30' : 'w-full'
+              }`}>
+                
+                {/* Split View Dropdown Selector for Primary */}
+                {isSplitView && (
+                  <div className="w-full shrink-0 ardena-glass border-b border-[#8F6B3E]/20 p-2 z-10 flex justify-between items-center px-4">
+                    <span className="text-[10px] font-bold text-[#8F6B3E] tracking-widest uppercase font-mono">Primary View</span>
+                    <select 
+                      value={selectedTab} 
+                      onChange={(e) => handleTabSelect(e.target.value)}
+                      className="bg-[#021812] text-[#C8A46B] border border-[#8F6B3E]/50 rounded-lg text-xs font-mono uppercase px-2.5 py-1 outline-none focus:border-[#C8A46B] cursor-pointer"
+                    >
+                      {TAB_OPTIONS.map(tab => (
+                        <option key={tab} value={tab}>{tab}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div className="flex-1 w-full relative">
+                  {/* Glassmorphic Shimmer Veil (Dissolves when frame stabilizes) */}
+                  {isTransitioning && (
+                    <div className="absolute inset-0 z-30 ardena-glass flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300">
+                      <div className="w-32 h-1 bg-[#063328] rounded-full overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#C8A46B] to-transparent animate-shimmer"></div>
+                      </div>
+                      <p className="mt-3 text-[10px] font-mono tracking-widest text-[#C8A46B] uppercase">Loading Canvas...</p>
                     </div>
                   )}
 
+                  {activeEmbedUrlPrimary ? (
+                    <div className="absolute inset-0 w-full h-full overflow-hidden">
+                      <iframe 
+                        src={activeEmbedUrlPrimary} 
+                        className="absolute left-0 top-0 w-full"
+                        style={{ height: 'calc(100% + 36px)', border: 'none', colorScheme: 'dark' }}
+                        allowFullScreen
+                        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                      ></iframe>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
+                      <svg className="w-10 h-10 text-[#8F6B3E]/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                      <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
+                      <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
+                        Report link for {selectedTab} is being provisioned.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* SECONDARY PANEL (Fluidly unfolds when Split View is engaged) */}
+              {isSplitView && (
+                <div className="relative flex flex-col h-full w-1/2 shrink-0 overflow-hidden bg-[#01140E] split-panel-anim border-l border-[#8F6B3E]/20">
+                  
+                  {/* Split View Header for Secondary */}
+                  <div className="w-full shrink-0 ardena-glass border-b border-[#8F6B3E]/20 p-2 z-10 flex justify-between items-center px-4">
+                    <span className="text-[10px] font-bold text-[#8F6B3E] tracking-widest uppercase font-mono">Comparison View</span>
+                    <select 
+                      value={comparisonTab} 
+                      onChange={(e) => setComparisonTab(e.target.value)}
+                      className="bg-[#021812] text-[#C8A46B] border border-[#8F6B3E]/50 rounded-lg text-xs font-mono uppercase px-2.5 py-1 outline-none focus:border-[#C8A46B] cursor-pointer"
+                    >
+                      {TAB_OPTIONS.map(tab => (
+                        <option key={tab} value={tab}>{tab}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div className="flex-1 w-full relative">
-                    {activeEmbedUrlPrimary ? (
+                    {activeEmbedUrlSecondary ? (
                       <div className="absolute inset-0 w-full h-full overflow-hidden">
                         <iframe 
-                          src={activeEmbedUrlPrimary} 
+                          src={activeEmbedUrlSecondary} 
                           className="absolute left-0 top-0 w-full"
                           style={{ height: 'calc(100% + 36px)', border: 'none', colorScheme: 'dark' }}
                           allowFullScreen
@@ -338,65 +530,18 @@
                       </div>
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
-                        <svg className="w-12 h-12 text-[#8F6B3E]/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        <svg className="w-10 h-10 text-[#8F6B3E]/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-                        <p className="text-xs font-serif tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
-                        <p className="text-[10px] text-[#A7B5AC] max-w-xs mt-1">
-                          {selectedTab === 'EA Journey' 
-                            ? "This dataset has requested PTO. It will return to work once its Looker Studio link is configured." 
-                            : `Data Studio link for ${selectedTab} is being configured...`}
+                        <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
+                        <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
+                          Report link for {comparisonTab} is being provisioned.
                         </p>
                       </div>
                     )}
                   </div>
                 </div>
-
-                {/* SECONDARY PANEL (Only rendered if Split View is active) */}
-                {isSplitView && (
-                  <div className="relative flex flex-col h-full w-1/2 shrink-0 overflow-hidden bg-[#01140E]">
-                    
-                    <div className="w-full shrink-0 bg-[#0A2B22]/90 border-b border-[#8F6B3E]/20 p-2 z-10 flex justify-between items-center px-4 backdrop-blur-sm shadow-md">
-                      <span className="text-[10px] font-bold text-[#8F6B3E] tracking-widest uppercase">Comparison View</span>
-                      <select 
-                        value={comparisonTab} 
-                        onChange={(e) => setComparisonTab(e.target.value)}
-                        className="bg-[#021E16] text-[#C8A46B] border border-[#8F6B3E]/50 rounded text-xs font-serif uppercase px-2 py-1 outline-none focus:border-[#C8A46B] cursor-pointer"
-                      >
-                        {TAB_OPTIONS.map(tab => (
-                          <option key={tab} value={tab}>{tab}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex-1 w-full relative">
-                      {activeEmbedUrlSecondary ? (
-                        <div className="absolute inset-0 w-full h-full overflow-hidden">
-                          <iframe 
-                            src={activeEmbedUrlSecondary} 
-                            className="absolute left-0 top-0 w-full"
-                            style={{ height: 'calc(100% + 36px)', border: 'none', colorScheme: 'dark' }}
-                            allowFullScreen
-                            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-                          ></iframe>
-                        </div>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
-                          <svg className="w-12 h-12 text-[#8F6B3E]/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                          </svg>
-                          <p className="text-xs font-serif tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
-                          <p className="text-[10px] text-[#A7B5AC] max-w-xs mt-1">
-                            {comparisonTab === 'EA Journey' 
-                              ? "This dataset has requested PTO. It will return to work once its Looker Studio link is configured." 
-                              : `Data Studio link for ${comparisonTab} is being configured...`}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </main>
         </div>
