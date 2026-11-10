@@ -128,11 +128,11 @@
       animation: emblem-pulse 2.2s ease-in-out infinite;
     }
 
-    /* Luxury Radial Veil Dissolve */
+    /* Luxury Radial Veil Dissolve (100% Solid to Block White Flashes) */
     .loading-veil {
-      background: radial-gradient(circle at center, rgba(6, 40, 30, 0.97) 0%, rgba(2, 24, 18, 0.99) 85%);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
+      background: radial-gradient(circle at center, #06281e 0%, #021812 85%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       transition: opacity 0.65s var(--ease-fluid), transform 0.65s var(--ease-fluid), visibility 0.65s;
     }
     .loading-veil.fade-out {
@@ -142,6 +142,7 @@
       pointer-events: none;
     }
     .report-frame {
+      background-color: #021812;
       transition: opacity 0.65s var(--ease-fluid), transform 0.65s var(--ease-fluid);
     }
   </style>
@@ -552,7 +553,7 @@
                   </div>
                 )}
 
-                <div className="flex-1 w-full relative">
+                <div className="flex-1 w-full relative bg-[#021812]">
                   {/* The Emphasized Loading Screen (Ardena Signature) */}
                   <div className={`loading-veil absolute inset-0 z-30 flex flex-col items-center justify-center ${
                     isTransitioning ? 'opacity-100' : 'fade-out'
@@ -584,29 +585,47 @@
                     </div>
                   </div>
 
-                  {activeEmbedUrlPrimary ? (
-                    <div className={`report-frame absolute inset-0 w-full h-full overflow-hidden ${
-                      isTransitioning ? 'opacity-0 scale-[0.995]' : 'opacity-100 scale-100'
-                    }`}>
-                      <iframe 
-                        src={activeEmbedUrlPrimary} 
-                        className="absolute left-0 top-0 w-full"
-                        style={{ height: 'calc(100% + 36px)', border: 'none', colorScheme: 'dark' }}
-                        allowFullScreen
-                        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-                      ></iframe>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
-                      <svg className="w-10 h-10 text-[#8F6B3E]/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                      </svg>
-                      <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
-                      <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
-                        Report link for {selectedTab} is being provisioned.
-                      </p>
-                    </div>
-                  )}
+                  {/* Multi-Iframe Background Pool: Keeps visited reports alive in memory & eliminates white flashes */}
+                  <div className="absolute inset-0 w-full h-full bg-[#021812] overflow-hidden">
+                    {Array.from(visitedTabs).map((tabId) => {
+                      const url = LOOKER_STUDIO_URLS[tabId];
+                      if (!url) return null;
+                      const isCurrent = tabId === selectedTab;
+
+                      return (
+                        <div 
+                          key={tabId}
+                          className={`report-frame absolute inset-0 w-full h-full bg-[#021812] ${
+                            isCurrent
+                              ? (isTransitioning ? 'opacity-0 scale-[0.995] pointer-events-none' : 'opacity-100 scale-100 pointer-events-auto')
+                              : 'opacity-0 pointer-events-none invisible'
+                          }`}
+                          style={{ zIndex: isCurrent ? 10 : 0 }}
+                        >
+                          <iframe 
+                            src={url} 
+                            className="absolute left-0 top-0 w-full bg-[#021812]"
+                            style={{ height: 'calc(100% + 36px)', border: 'none', colorScheme: 'dark', backgroundColor: '#021812' }}
+                            allowFullScreen
+                            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                          ></iframe>
+                        </div>
+                      );
+                    })}
+
+                    {/* Pending Module Fallback Card */}
+                    {!LOOKER_STUDIO_URLS[selectedTab] && (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
+                        <svg className="w-10 h-10 text-[#8F6B3E]/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
+                        <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
+                          Report link for {selectedTab} is being provisioned.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -628,13 +647,13 @@
                     </select>
                   </div>
 
-                  <div className="flex-1 w-full relative">
+                  <div className="flex-1 w-full relative bg-[#021812]">
                     {activeEmbedUrlSecondary ? (
-                      <div className="absolute inset-0 w-full h-full overflow-hidden">
+                      <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#021812]">
                         <iframe 
                           src={activeEmbedUrlSecondary} 
-                          className="absolute left-0 top-0 w-full"
-                          style={{ height: 'calc(100% + 36px)', border: 'none', colorScheme: 'dark' }}
+                          className="absolute left-0 top-0 w-full bg-[#021812]"
+                          style={{ height: 'calc(100% + 36px)', border: 'none', colorScheme: 'dark', backgroundColor: '#021812' }}
                           allowFullScreen
                           sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                         ></iframe>
@@ -643,24 +662,24 @@
                       <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#01140E]">
                         <svg className="w-10 h-10 text-[#8F6B3E]/40 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                      </svg>
-                      <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
-                      <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
-                        Report link for {comparisonTab} is being provisioned.
-                      </p>
-                    </div>
-                  )}
+                        </svg>
+                        <p className="text-xs font-cinzel tracking-widest text-[#C8A46B] uppercase mb-1">Module Pending</p>
+                        <p className="text-[10px] text-[#A7B5AC] font-mono max-w-xs mt-1">
+                          Report link for {comparisonTab} is being provisioned.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    );
-  }
+              )}
+            </div>
+          </main>
+        </div>
+      );
+    }
 
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(<App />);
-</script>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
 </body>
 </html>
