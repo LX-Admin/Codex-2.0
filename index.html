@@ -156,13 +156,14 @@
 
     const RAW_DATA_URL = 'https://docs.google.com/spreadsheets/d/17pl95MG7qbn4NGn_YookTwkAYTopBUIvZj7jyq_Kcq0/edit?usp=drive_link';
 
-    // Durations for adaptive loading transitions
+    // Durations & capacity for adaptive loading transitions
     const COLD_LOAD_DURATION = 3800; // 3.8s gives Looker Studio sufficient time to paint dark layout
     const WARM_LOAD_DURATION = 700;  // 0.7s snappy switch for cached frames
+    const MAX_CACHED_TABS = 5;       // Cap background RAM pool at 5 active reports (LRU)
 
     const LOOKER_STUDIO_URLS = {
-      'EA Journey': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_wkqgjo6n4d?pageNavigation=hidden', 
-      'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden', 
+      'EA Journey': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_wkqgjo6n4d?pageNavigation=hidden',
+      'LX Performance': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/THoyF?pageNavigation=hidden',
       'Pre-Training': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_fzru8en83d?pageNavigation=hidden',
       'Training': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_tu8qg2e43d?pageNavigation=hidden',
       'Pre-Matching': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_zu5a8w613d?pageNavigation=hidden',
@@ -170,7 +171,8 @@
       'Churn Data': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_xevgdwhf4d?pageNavigation=hidden',
       'LX Pilot: No CRC': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_vl1ngeyp8d?pageNavigation=hidden',
       'LX Pilot: FVC': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_yk9yd3uq8d?pageNavigation=hidden',
-      'LX Pilot: Hybrid Setup': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_4py806wq8d?pageNavigation=hidden'
+      'LX Pilot: Hybrid Setup': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_4py806wq8d?pageNavigation=hidden',
+      'Custom Report': 'https://datastudio.google.com/embed/reporting/f49cc02b-3dfa-411b-a5b3-a680b862bf32/page/p_fus3so345d?pageNavigation=hidden'
     };
 
     const TAB_OPTIONS = Object.keys(LOOKER_STUDIO_URLS);
@@ -186,7 +188,9 @@
       // Laboratory Glassware Suite for Pilot Programs
       'LX Pilot: No CRC': 'M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5m4.75-11.396A2.25 2.25 0 0112 3c.875 0 1.674.5 2.05 1.258m-4.3 0h4.5m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5m-9.25 6.5h9.5a2.25 2.25 0 002.05-3.158l-3.8-7.6A2.25 2.25 0 0015.45 9H8.55a2.25 2.25 0 00-2.05 1.242l-3.8 7.6A2.25 2.25 0 004.75 21z',
       'LX Pilot: FVC': 'M10 2.5h4M10.5 2.5v5.8a6.5 6.5 0 103 0V2.5M7.8 14.5a6.45 6.45 0 008.4 0',
-      'LX Pilot: Hybrid Setup': 'M4.5 3.75h15M6 3.75v13.5a3.75 3.75 0 003.75 3.75h4.5a3.75 3.75 0 003.75-3.75V3.75M6 8.5h4m-4 3.5h5m-5 3.5h3'
+      'LX Pilot: Hybrid Setup': 'M4.5 3.75h15M6 3.75v13.5a3.75 3.75 0 003.75 3.75h4.5a3.75 3.75 0 003.75-3.75V3.75M6 8.5h4m-4 3.5h5m-5 3.5h3',
+      // Bespoke Sparkle Emblem for Stakeholder Custom Report
+      'Custom Report': 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z'
     };
 
     const tabToSlug = (tabName) => tabName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -215,12 +219,18 @@
       const [systemAlert, setSystemAlert] = useState(null);
       const [isTransitioning, setIsTransitioning] = useState(true);
       const [loadingPhase, setLoadingPhase] = useState("Compiling datasets...");
-      const [visitedTabs, setVisitedTabs] = useState(() => new Set([initialTab]));
+      const [visitedTabs, setVisitedTabs] = useState([initialTab]);
+      const recentOrderRef = useRef([initialTab]);
       const [loadedIframes, setLoadedIframes] = useState(() => new Set());
       
       // Split View State
       const [isSplitView, setIsSplitView] = useState(false);
       const [comparisonTab, setComparisonTab] = useState(TAB_OPTIONS[1] || TAB_OPTIONS[0]);
+
+      // Timer Refs to prevent rapid-switch race conditions
+      const phaseTimerRef = useRef(null);
+      const completeTimerRef = useRef(null);
+      const alertTimerRef = useRef(null);
 
       // Dynamic specular cursor follower
       const rootRef = useRef(null);
@@ -237,17 +247,17 @@
 
       // Initial Cold Load on Mount (3.8s)
       useEffect(() => {
-        const phaseTimer = setTimeout(() => {
+        phaseTimerRef.current = setTimeout(() => {
           setLoadingPhase("Rendering metrics...");
         }, 1800);
 
-        const completeTimer = setTimeout(() => {
+        completeTimerRef.current = setTimeout(() => {
           setIsTransitioning(false);
         }, COLD_LOAD_DURATION);
 
         return () => {
-          clearTimeout(phaseTimer);
-          clearTimeout(completeTimer);
+          if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current);
+          if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
         };
       }, []);
 
@@ -276,24 +286,41 @@
       }, []);
 
       const triggerAlert = (message) => {
+        if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
         setSystemAlert(message);
-        setTimeout(() => setSystemAlert(null), 3500);
+        alertTimerRef.current = setTimeout(() => setSystemAlert(null), 3500);
       };
 
       const handleTabSelect = (tabId, updateUrl = true) => {
         if (tabId === selectedTab) return;
+
+        // Clear any pending transition timers from rapid clicking
+        if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current);
+        if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
         
         setIsTransitioning(true);
         setSelectedTab(tabId);
         
-        // Adaptive loading duration: 3.8s for cold visit, 0.7s for cached visit
-        const isFirstVisit = !visitedTabs.has(tabId);
-        const duration = isFirstVisit ? COLD_LOAD_DURATION : WARM_LOAD_DURATION;
+        // Adaptive loading duration: 0.7s if inside the 5-slot RAM buffer, 3.8s if cold/evicted
+        const isCached = visitedTabs.includes(tabId);
+        const duration = isCached ? WARM_LOAD_DURATION : COLD_LOAD_DURATION;
 
-        if (isFirstVisit) {
-          setVisitedTabs(prev => new Set([...(prev || []), tabId]));
+        // Track Least-Recently-Used (LRU) order without shifting active DOM nodes
+        recentOrderRef.current = [...recentOrderRef.current.filter(t => t !== tabId), tabId];
+
+        if (!isCached) {
+          setVisitedTabs(prev => {
+            if (prev.length < MAX_CACHED_TABS) {
+              return [...prev, tabId];
+            }
+            // Evict the oldest unused report to keep RAM capped at 5 slots
+            const evictTarget = recentOrderRef.current[0];
+            recentOrderRef.current = recentOrderRef.current.filter(t => t !== evictTarget);
+            return [...prev.filter(t => t !== evictTarget), tabId];
+          });
+
           setLoadingPhase("Compiling datasets...");
-          setTimeout(() => {
+          phaseTimerRef.current = setTimeout(() => {
             setLoadingPhase("Rendering metrics...");
           }, 1800);
         } else {
@@ -333,7 +360,7 @@
           triggerAlert(`Switched to: ${tabId}`);
         }
 
-        setTimeout(() => {
+        completeTimerRef.current = setTimeout(() => {
           setIsTransitioning(false);
         }, duration);
       };
@@ -343,12 +370,16 @@
         setIsSplitView(nextState);
 
         // Track split-view usage in Google Analytics
-        if (typeof gtag === 'function') {
-          gtag('event', 'toggle_split_view', {
-            is_split: nextState,
-            primary_view: selectedTab,
-            comparison_view: comparisonTab
-          });
+        try {
+          if (typeof gtag === 'function') {
+            gtag('event', 'toggle_split_view', {
+              is_split: nextState,
+              primary_view: selectedTab,
+              comparison_view: comparisonTab
+            });
+          }
+        } catch (e) {
+          console.warn("Analytics event dispatch deferred:", e);
         }
 
         triggerAlert(nextState ? "Split Comparison View Engaged" : "Single Workspace View Restored");
@@ -403,7 +434,7 @@
                     <span className="text-[10px] font-bold text-[#8F6B3E] tracking-[0.2em] uppercase font-mono">
                       Modules
                     </span>
-                    <span className="text-[9px] text-[#C8A46B]/60 font-mono">10</span>
+                    <span className="text-[9px] text-[#C8A46B]/60 font-mono">{TAB_OPTIONS.length}</span>
                   </div>
                 )}
                 
@@ -591,9 +622,9 @@
                     </div>
                   </div>
 
-                  {/* Multi-Iframe Background Pool: Keeps visited reports alive in memory & eliminates white flashes */}
+                  {/* Multi-Iframe Background Pool: Keeps up to 5 recent reports alive in memory */}
                   <div className="absolute inset-0 w-full h-full bg-[#021812] overflow-hidden">
-                    {Array.from(visitedTabs).map((tabId) => {
+                    {visitedTabs.map((tabId) => {
                       const url = LOOKER_STUDIO_URLS[tabId];
                       if (!url) return null;
                       const isCurrent = tabId === selectedTab;
